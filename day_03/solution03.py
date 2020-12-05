@@ -4,36 +4,39 @@ from functools import reduce
 from operator import mul
 
 
-def map_biome(map_src, clear='.', blocked='#', repeat=0):
+def map_biome(biome_src, clear='.', blocked='#'):
     """
+    Parse biome_src text into numpy array.
     """
 
     translate_chars = {clear: '1',
                        blocked: '0'}
 
     arr = None
-    with open(map_src) as f:
+    with open(biome_src) as f:
         line = f.readline().strip()
         while line:
+            # Translate specified characters into 1s and 0s for clear and
+            # blocked.
             translation = str.translate(line, str.maketrans(translate_chars))
+
+            # Create array from translated string
             line_arr = np.array(list(translation), dtype=np.int8)
 
             if arr is None:
                 arr = line_arr
 
             else:
+                # stack current line's array to main array
                 arr = np.vstack((arr, line_arr))
 
             line = f.readline().strip()
-
-    if repeat > 0:
-        arr = np.tile(arr, repeat)
 
     return arr
 
 
 def traverse_biome(biome, start_coords=(0, 0), step_l=0, step_r=1, step_u=0,
-                   step_d=1, max_steps=5000, biome_end_row=None,
+                   step_d=1, max_steps=1000, biome_end_row=None,
                    biome_end_col=None, verbose=False):
     """
     Traverse the biome using the specified directional steps.
@@ -60,6 +63,7 @@ def traverse_biome(biome, start_coords=(0, 0), step_l=0, step_r=1, step_u=0,
             new_x = pos_x - step_l + step_r
             new_y = pos_y - step_u + step_d
 
+            # Check if end reached
             if new_x >= biome_end_col or new_y >= biome_end_row:
                 break
 
@@ -93,6 +97,7 @@ if __name__ == '__main__':
     routes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
 
     tree_count = {}
+    
     for i, (step_r, step_d) in enumerate(routes):
         res = traverse_biome(b, step_r=step_r, step_d=step_d,
                              biome_end_row=b.shape[0])

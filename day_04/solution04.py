@@ -2,13 +2,15 @@ import os
 import re
 
 # Validation specifications
-passport_spec = {'byr': range(1920, 2003),
-                 'iyr': range(2010, 2021),
-                 'eyr': range(2020, 2031),
-                 'hgt': list(range(59, 77)) + list(range(150, 193)),
-                 'hcl': '#[\da-f]{6}',
-                 'ecl': ['amb,', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth'],
-                 'pid': '\d{9}'}
+height_pttn = '^((?:1[5-8][0-9]cm)|(?:19[0-3]cm)|(?:59in)|(?:6[0-9]in)|' \
+              '(?:7[0-6]in))$'
+passport_criteria = {'byr': range(1920, 2003),
+                     'iyr': range(2010, 2021),
+                     'eyr': range(2020, 2031),
+                     'hgt': height_pttn,
+                     'hcl': '^#[\da-f]{6}$',
+                     'ecl': ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth'],
+                     'pid': '\d{9}$'}
 
 
 class Passport(object):
@@ -16,38 +18,42 @@ class Passport(object):
 
     def __init__(self, byr=None, ecl=None, eyr=None, hcl=None, hgt=None,
                  iyr=None, pid=None, cid=None):
-        self.byr = byr
+        self.byr = int(byr) if byr is not None else byr
         self.ecl = ecl
-        self.eyr = eyr
+        self.eyr = int(eyr) if eyr is not None else eyr
         self.hcl = hcl
         self.hgt = hgt
-        self.iyr = iyr
+        self.iyr = int(iyr) if iyr is not None else iyr
         self.pid = pid
         self.cid = cid
 
     def req_present(self):
-        return all([field is not None for field in self.req_fields])
+        return all([getattr(self, field) is not None
+                    for field in self.req_fields])
 
     def req_valid(self, valid_dict):
         """
-        Validate fields using spec in class
+        Validate req fields using spec in class
         """
         # Set all fields to True i.e. valid
-        valid_results = dict({field:True for field in self.req_fields })
+        valid_results = dict({field: False for field in self.req_fields})
 
-        for field, spec in valid_dict.items():
-            valid_results[field] = self.validator(field, spec)
+        for field, criteria in valid_dict.items():
+            valid_results[field] = self.validator(field, criteria)
 
         return all(valid_results.values())
 
-    def validator(self, field, valid_spec):
+    def validator(self, field, criteria):
         """
         """
-        if valid_spec is str:
-            return re.match(valid_spec, str(getattr(self,field))) is not None
-        else:
-            return val in valid_spec
+        val = getattr(self, field)
 
+        if val is None:
+            return False
+        elif isinstance(criteria, str):
+            return re.match(criteria, str(val)) is not None
+        else:
+            return val in criteria
 
 
 def process_passports(passport_batch, nline_sep=1, valid_method=None):
@@ -80,9 +86,9 @@ def process_passports(passport_batch, nline_sep=1, valid_method=None):
         if valid_method == 'present':
             is_valid = passport_obj.req_present()
         elif valid_method == 'value':
-            is_valid = passport_obj.req_valid()
+            is_valid = passport_obj.req_valid(valid_dict=passport_criteria)
 
-        if passport_obj.is_valid():
+        if is_valid:
             count_valid += 1
         else:
             count_invalid += 1
@@ -90,4 +96,4 @@ def process_passports(passport_batch, nline_sep=1, valid_method=None):
     return dict(count_valid=count_valid, count_invalid=count_invalid)
 
 
-print(process_passwords('./passports.txt'))
+print(process_passports('./passports.txt', valid_method='value'))

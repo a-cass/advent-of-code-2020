@@ -1,5 +1,6 @@
 import os
 import re
+import argparse
 
 # Validation specifications
 height_pttn = '^((?:1[5-8][0-9]cm)|(?:19[0-3]cm)|(?:59in)|(?:6[0-9]in)|' \
@@ -96,4 +97,27 @@ def process_passports(passport_batch, nline_sep=1, valid_method=None):
     return dict(count_valid=count_valid, count_invalid=count_invalid)
 
 
-print(process_passports('./passports.txt', valid_method='value'))
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='Passport Validator',
+                                     description='Advent of Code 2020 '
+                                                 'Solution 4'
+                                     )
+    parser.add_argument('passport_batch', help='Path to password batch file')
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-rp', '--req-present', action='store_true',
+                       help='Validate that all required values are present'
+                       )
+    group.add_argument('-rv', '--req-value', action='store_true',
+                       help='Validate that all required values are present '
+                            'and valid'
+                       )
+
+    args = parser.parse_args()
+    valid_method = None
+    if args.req_present:
+        valid_method = 'present'
+    elif args.req_value:
+        valid_method = 'value'
+
+    print(process_passports(args.passport_batch, valid_method=valid_method))

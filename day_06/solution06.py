@@ -2,7 +2,7 @@ import os
 from functools import reduce
 
 
-def parse_answers(src,by='group',nline_sep=1):
+def parse_answers(src, nline_sep=1):
     """
     Parse expenses into list of values
     """
@@ -18,7 +18,8 @@ def parse_answers(src,by='group',nline_sep=1):
 def summarise_group(group_str):
     """
     """
-    members = group_str.split(os.linesep)
+    # Drop any split parts that are empty strings
+    members = [m for m in group_str.split(os.linesep) if m]
 
     summary = {}
 
@@ -44,7 +45,6 @@ if __name__ == '__main__':
     sum_all = 0
 
     for grp in groups:
-        print('GRP --> ', grp, '\n')
         summary = summarise_group(grp)
         sum_any += len(summary['any'])
         sum_all += len(summary['all'])

@@ -36,7 +36,7 @@ class Passport(object):
         """
         Validate req fields using spec in class
         """
-        # Set all fields to True i.e. valid
+        # Set all fields to False i.e. invalid
         valid_results = dict({field: False for field in self.req_fields})
 
         for field, criteria in valid_dict.items():

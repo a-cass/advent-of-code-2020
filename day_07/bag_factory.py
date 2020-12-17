@@ -120,7 +120,7 @@ class Bag(object):
     the colours and amount of these inner bags.
 
     Parameters
-    __________
+    ----------
     colour: str
         Bag colour.
     accepts: dict(str:int))
@@ -168,7 +168,7 @@ class Bag(object):
         bags already checked and avoid infinite checks.
 
         Parameters
-        ------
+        ----------
         colour: str
             Colour of bag to check.
         colours_seen: list of str, optional

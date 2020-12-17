@@ -208,4 +208,3 @@ if __name__ == '__main__':
     bag = get_bag('shiny gold')
     print(bag.colour)
     print(bag.accepts)
-    print(globals())
